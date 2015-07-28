@@ -61,16 +61,19 @@ def check_neighbours(name, labels, index):
             res.append(labels[x][1])
     return res
 
+def main():
+    labels = load_labels()
+    labels.sort(key=lambda x: x[0])
+    reversed_labels = map(lambda x: (x[0][::-1], x[1]), labels)
+    reversed_labels.sort(key=lambda x: x[0])
 
-labels = load_labels()
-labels.sort(key=lambda x: x[0])
-reversed_labels = map(lambda x: (x[0][::-1], x[1]), labels)
-reversed_labels.sort(key=lambda x: x[0])
+    while (True):
+        name = raw_input("lets look for: ")
+        if (name == "exit"):
+            break
+        result = binary_search(name, labels)
+        result.extend(binary_search(name[::-1], reversed_labels))
+        print set(result)
+    return
 
-while (True):
-    name = raw_input("lets look for: ")
-    if (name == "exit"):
-        break
-    result = binary_search(name, labels)
-    result.extend(binary_search(name[::-1], reversed_labels))
-    print set(result)
+if __name__ == "__main__": main()
