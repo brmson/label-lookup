@@ -1,9 +1,16 @@
 #!/usr/bin/pypy
+#Script for pseudo-fuzzy search in a list of labels
 
-#list of tuples, labels[i][0] is the label, labels[i][1] is the property name
-#currently requires the labels_en.nq file to be in the same directory
+edit_threshold = 3
+neighbours_to_check = 2 # the checked amount is double, because we look n positions up and n positions down
+labels = []
+reversed_labels = []
+from flask import *
+app = Flask(__name__)
+
+#list of tuples, labels[i][0] is the label which we search labels[i][1] is the property name which we return
 def load_labels():
-    labels = []
+    loaded_labels = []
     with open("labels_en.nq", "r") as f:
         counter = 0
         for line in f:
@@ -11,10 +18,10 @@ def load_labels():
             start_index = line.find('\"')+1
             end_index = line.find('\"', start_index)
             label = line[start_index:end_index]
-            labels.append((label, name))
-    return labels
+            loaded_labels.append((label, name))
+    return loaded_labels
 
-def levenshtein(s, t):
+def levenshtein(s, t): # XXX this can be done better using numPy
         ''' From Wikipedia article; Iterative with two matrix rows. '''
         if s == t: return 0
         elif len(s) == 0: return len(t)
@@ -37,10 +44,10 @@ def binary_search(name, labels):
     upper_bound = len(labels)
     middle = 0
     found = False
-    result = []
+    result = set()
     while lower_bound <= upper_bound:
         middle = (lower_bound+upper_bound) // 2
-        result.extend(check_neighbours(name, labels, middle))
+        result = result | (check_neighbours(name, labels, middle))
         if labels[middle][0] < name:
             lower_bound = middle + 1
         elif labels[middle][0] > name:
@@ -52,28 +59,62 @@ def binary_search(name, labels):
 #checks the edit distance of 4 neighbours and the target index
 def check_neighbours(name, labels, index):
     #check bounds of list
-    start = (index - 2) if (index - 2) > 0 else 0
-    end = (index + 2) if (index + 2) < (len(labels) - 1) else (len(labels) - 1)
-    res = []
-    edit_threshold = 3
+    global neighbours_to_check
+    start = (index - neighbours_to_check) if (index - neighbours_to_check) > 0 else 0
+    end = (index + neighbours_to_check) if (index + neighbours_to_check) < (len(labels) - 1) else (len(labels) - 1)
+    res = set()
+    global edit_threshold
     for x in range(start, end):
         if (levenshtein(name, labels[x][0]) <= edit_threshold):
-            res.append(labels[x][1])
+            res.add(labels[x][1])
     return res
 
-def main():
+def web_init():
+    global labels
+    global reversed_labels
     labels = load_labels()
     labels.sort(key=lambda x: x[0])
     reversed_labels = map(lambda x: (x[0][::-1], x[1]), labels)
     reversed_labels.sort(key=lambda x: x[0])
+    print "init done"
+    app.run()
 
+@app.route('/search/<name>')
+def search(name):
+    global labels
+    global reversed_labels
+    print "searching " + name
+    result = set()
+    result = result | binary_search(name, labels)
+    result = result | binary_search(name[::-1], reversed_labels)
+    print "found:"
+    print result
+    return jsonify(results=list(result))
+
+# TOOD: add remote threshold and neighbourcount setting
+def interactive():
+    labels = load_labels()
+    labels.sort(key=lambda x: x[0])
+    reversed_labels = map(lambda x: (x[0][::-1], x[1]), labels)
+    reversed_labels.sort(key=lambda x: x[0])
     while (True):
+        result = set()
         name = raw_input("lets look for: ")
         if (name == "exit"):
             break
-        result = binary_search(name, labels)
-        result.extend(binary_search(name[::-1], reversed_labels))
-        print set(result)
+        if (name == "setNeighbours"):
+            global neighbours_to_check
+            next_num = int(input("current neighbour count is "+neighbours_to_check+", please input new number"))
+            neighbours_to_check = next_num
+            continue
+        if (name == "setThreshold"):
+            global edit_threshold
+            next_num = int(input("current edit threshold is "+edit_threshold+", please input new number"))
+            edit_threshold = next_num
+            continue
+        result = result | binary_search(name, labels)
+        result = result | (binary_search(name[::-1], reversed_labels))
+        print result
     return
-
-if __name__ == "__main__": main()
+#to use a more interactive console mode, change web_init() to interactive()
+if __name__ == "__main__": web_init()
