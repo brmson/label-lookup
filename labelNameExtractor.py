@@ -90,8 +90,8 @@ def search(name):
     result_list = list(result)
     result_list.sort(key=lambda x: levenshtein(name, x))
     print "found:"
-    print result_list
-    return jsonify(results=result_list)
+    print result_list[:3]
+    return jsonify(results=result_list[:3])
 
 # TOOD: add remote threshold and neighbourcount setting
 def interactive():
@@ -117,10 +117,10 @@ def interactive():
         result = result | binary_search(name, labels)
         result = result | (binary_search(name[::-1], reversed_labels))
         print list(result)
-        print "now sorted"
+        print "now sorted and trimed"
         sorted_list = list(result)
         sorted_list.sort(key=lambda x: levenshtein(name, x))
-        print sorted_list
+        print sorted_list[:3]
     return
 #to use a more interactive console mode, change web_init() to interactive()
 if __name__ == "__main__": web_init()
