@@ -87,9 +87,11 @@ def search(name):
     result = set()
     result = result | binary_search(name, labels)
     result = result | binary_search(name[::-1], reversed_labels)
+    result_list = list(result)
+    result_list.sort(key=lambda x: levenshtein(name, x))
     print "found:"
-    print result
-    return jsonify(results=list(result))
+    print result_list
+    return jsonify(results=result_list)
 
 # TOOD: add remote threshold and neighbourcount setting
 def interactive():
@@ -114,7 +116,11 @@ def interactive():
             continue
         result = result | binary_search(name, labels)
         result = result | (binary_search(name[::-1], reversed_labels))
-        print result
+        print list(result)
+        print "now sorted"
+        sorted_list = list(result)
+        sorted_list.sort(key=lambda x: levenshtein(name, x))
+        print sorted_list
     return
 #to use a more interactive console mode, change web_init() to interactive()
 if __name__ == "__main__": web_init()
