@@ -10,8 +10,6 @@ pageIDs_filename = "page-ids_en.nq"
 
 
 from flask import *
-#import os
-#import cPickle as pickle
 
 app = Flask(__name__)
 
@@ -132,29 +130,17 @@ def web_init():
 def init():
     global labels_and_ids
     global reversed_labels
-    if os.path.exists("label_list.pickle"):
-        print "loading labels from pickle"
-        labels_and_ids = pickle.load(open("label_list.pickle", "r"))
-        print len(labels_and_ids)
-    else:
-        print "generating labels from files"
-        labels = load_labels()
-        ids = load_IDs()
-        print "loading done, starting sort"
-        labels.sort(key=lambda x: x[0])
-        ids.sort(key=lambda x: x[0])
-        print "sorting done, merging"
-        labels_and_ids = merge_tuple_lists(labels, ids)
-        del labels
-        del ids
-        print "dumping to pickle"
-        pickle.dump(labels_and_ids, open("label_list.pickle", "w"), protocol=-1)
-    if os.path.exists("reversed_label_list.pickle"):
-        reversed_labels = pickle.load(open("reversed_label_list.pickle", "r"))
-    else:
-        reversed_labels = map(lambda x: (x[0][::-1], x[1], x[2]), labels_and_ids)
-        reversed_labels.sort(key=lambda x: x[0])
-        pickle.dump(reversed_labels, open("reversed_label_list.pickle", "w"), protocol=-1)
+    labels = load_labels()
+    ids = load_IDs()
+    print "loading done, starting sort"
+    labels.sort(key=lambda x: x[0])
+    ids.sort(key=lambda x: x[0])
+    print "sorting done, merging"
+    labels_and_ids = merge_tuple_lists(labels, ids)
+    del labels # XXX the memory usage gets really high
+    del ids 
+    reversed_labels = map(lambda x: (x[0][::-1], x[1], x[2]), labels_and_ids)
+    reversed_labels.sort(key=lambda x: x[0])
     print "init done"
 
 @app.route('/search/<name>')
