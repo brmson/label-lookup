@@ -1,6 +1,10 @@
 #!/usr/bin/pypy
 #Script for pseudo-fuzzy search in a list of labels
 
+import os
+from flask import *
+app = Flask(__name__)
+
 edit_threshold = 3
 neighbours_to_check = 2 # the checked amount is double, because we look n positions up and n positions down
 labels_and_ids = []
@@ -8,14 +12,7 @@ reversed_labels = []
 labels_filename = "labels_en.nq"
 pageIDs_filename = "page-ids_en.nq"
 
-
-from flask import *
-
-app = Flask(__name__)
-
-
-
-#list of tuples, labels[i][0] is the label which we search labels[i][1] is the property name which we return
+#list of tuples, labels[i][0] is the label which we use to search, labels[i][1] is the property name which we return
 def load_labels():
     loaded_labels = []
     with open(labels_filename, "r") as f:
@@ -28,6 +25,19 @@ def load_labels():
             label = line[label_start_index:label_end_index]
             loaded_labels.append((label, name))
     return loaded_labels
+
+def save_to_file():
+    with open("sorted_list.dat", "w") as f:
+        for x in range(0, len(labels_and_ids)):
+            f.write(labels_and_ids[x][0] + "\t" + labels_and_ids[x][1] + "\t" + labels_and_ids[x][2] + "\n")
+
+def load_from_file():
+    res = []
+    with open("sorted_list.dat", "r") as f:
+        for line in f:
+            tmp = line.split("\t")
+            res.append((tmp[0], tmp[1], tmp[2]))
+    return res
 
 #XXX code duplication
 #labels[i][0] is the property name and labels[i][1] is the pageID
@@ -44,6 +54,7 @@ def load_IDs():
     return loaded_IDs
 
 #finds a wikipedia ID for each label
+# list[x][0] is the label we use to search, list[x][1] is the name to return and list[x][2] is the wikiID
 def merge_tuple_lists(label_list, ID_list):
     result_list = []
     skipped = 0
@@ -63,9 +74,8 @@ def merge_tuple_lists(label_list, ID_list):
 def binary_retrieve(name, ids):
     lower_bound = 0
     upper_bound = len(ids) - 1
-    found = False
     middle = 0
-    while lower_bound <= upper_bound and found == False:
+    while lower_bound <= upper_bound:
         middle = (lower_bound + upper_bound) // 2
         if ids[middle][0] < name:
             lower_bound = middle + 1
@@ -110,7 +120,7 @@ def binary_search(name, labels):
             break #full match
     return result
 
-#checks the edit distance of 4 neighbours and the target index
+#checks the edit distance of 2n neighbours and the target index
 def check_neighbours(name, labels, index):
     #check bounds of list
     global neighbours_to_check
@@ -130,29 +140,34 @@ def web_init():
 def init():
     global labels_and_ids
     global reversed_labels
-    labels = load_labels()
-    ids = load_IDs()
-    print "loading done, starting sort"
-    labels.sort(key=lambda x: x[0])
-    ids.sort(key=lambda x: x[0])
-    print "sorting done, merging"
-    labels_and_ids = merge_tuple_lists(labels, ids)
-    del labels # XXX the memory usage gets really high
-    del ids
+    if(os.path.isfile("sorted_list.dat")):
+        print "loading from file"
+        labels_and_ids = load_from_file()
+        print len(labels_and_ids)
+    else:
+        print "generating labels"
+        labels = load_labels()
+        ids = load_IDs()
+        print "loading done, starting sort"
+        labels.sort(key=lambda x: x[0])
+        ids.sort(key=lambda x: x[0])
+        print "sorting done, merging"
+        labels_and_ids = merge_tuple_lists(labels, ids)
+        del labels # XXX the memory usage gets really high
+        del ids
+        save_to_file()
     reversed_labels = map(lambda x: (x[0][::-1], x[1], x[2]), labels_and_ids)
     reversed_labels.sort(key=lambda x: x[0])
     print "init done"
 
 @app.route('/search/<name>')
 def search(name):
-    global labels
-    global reversed_labels
     print "searching " + name
-    result = set
-    result = result | binary_search(name, labels)
+    result = set(ice)
+    result = result | binary_search(name, labels_and_ids)
     result = result | binary_search(name[::-1], reversed_labels)
     result_list = list(result)
-    result_list.sort(key=lambda x: levenshtein(name, x))
+    result_list.sort(key=lambda x: levenshtein(name, x[0]))
     print "found:"
     print result_list[:3]
     return jsonify(results=result_list[:3])
@@ -180,7 +195,7 @@ def interactive():
         print list(result)
         print "now sorted and trimed"
         sorted_list = list(result) # XXX When the result is found using reversed labels, we should also sort it in a reverse way
-        sorted_list.sort(key=lambda x: levenshtein(name, x))
+        sorted_list.sort(key=lambda x: levenshtein(name, x[0]))
         print sorted_list[:3]
     return
 #to use a more interactive console mode, change web_init() to interactive()
