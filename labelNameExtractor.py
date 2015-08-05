@@ -138,7 +138,7 @@ def init():
     print "sorting done, merging"
     labels_and_ids = merge_tuple_lists(labels, ids)
     del labels # XXX the memory usage gets really high
-    del ids 
+    del ids
     reversed_labels = map(lambda x: (x[0][::-1], x[1], x[2]), labels_and_ids)
     reversed_labels.sort(key=lambda x: x[0])
     print "init done"
@@ -167,19 +167,19 @@ def interactive():
             break
         if (name == "setNeighbours"):
             global neighbours_to_check
-            next_num = int(input("current neighbour count is "+neighbours_to_check+", please input new number"))
+            next_num = int(input("current neighbour count is "+str(neighbours_to_check)+", please input new number "))
             neighbours_to_check = next_num
             continue
         if (name == "setThreshold"):
             global edit_threshold
-            next_num = int(input("current edit threshold is "+edit_threshold+", please input new number"))
+            next_num = int(input("current edit threshold is "+str(edit_threshold)+", please input new number "))
             edit_threshold = next_num
             continue
         result = result | binary_search(name, labels_and_ids)
         result = result | (binary_search(name[::-1], reversed_labels))
         print list(result)
         print "now sorted and trimed"
-        sorted_list = list(result)
+        sorted_list = list(result) # XXX When the result is found using reversed labels, we should also sort it in a reverse way
         sorted_list.sort(key=lambda x: levenshtein(name, x))
         print sorted_list[:3]
     return
