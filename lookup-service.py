@@ -85,7 +85,7 @@ def init():
 @app.route('/search/<name>')
 def search(name):
     print "searching " + name
-    result = set(ice)
+    result = set()
     result = result | binary_search(name, labels_and_ids)
     result = result | binary_search(name[::-1], reversed_labels)
     result_list = list(result)
