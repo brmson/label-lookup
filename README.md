@@ -12,6 +12,10 @@ endpoints and such.
 Setup
 -----
 
+Requirements: Couple of gigabytes of disk space for the dataset.
+The preprocessing takes about 6GB of RAM; the service runtime stabilizes
+on 4.5GB RAM usage.
+
 ### Data Preprocessing
 
 Input data (DBpedia-2014):
