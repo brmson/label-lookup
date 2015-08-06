@@ -92,7 +92,7 @@ class Dataset:
     def search(self, name):
         result = set()
         result = result | binary_search(name, self.labels)
-        result = result | binary_search(name[::-1], self.reversed_labels)
+        result = result | set([(r[0][::-1], r[1]) for r in binary_search(name[::-1], self.reversed_labels)])
         result_list = [{'label': r[0], 'name': r[1], 'pageID': self.id_map[r[1]], 'dist': levenshtein(name, r[0])} for r in result]
         result_list.sort(key=lambda x: x['dist'])
         return result_list
