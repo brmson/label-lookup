@@ -9,8 +9,10 @@ contains typos or omissions.  This is designed as an external service to
 conserve memory, allow even remote operation and pair up nicely with SPARQL
 endpoints and such.
 
-Initialization
---------------
+Setup
+-----
+
+### Data Preprocessing
 
 Input data:
   * http://downloads.dbpedia.org/2015-04/core-i18n/en/labels_en.nq.bz2
@@ -19,9 +21,12 @@ Input data:
 (FIXME: We may want to use DBpedia-2014 consistent with our YodaQA scientific
 setting instead?)
 
-The script currently requires the labels_en.nq and page-ids-en.nq files to be in the same directory.
-After sorting and merging both lists, it creates a file called sorted_list.dat, which is used
-to speed up loading.
+First, we preprocess the dataset to build a single sorted list sorted_list.dat
+to speed up next loadings:
+
+	./preprocess.py labels_en.nq page-ids_en.nq sorted_list.dat
+
+### Python Setup
 
 Our Python executables use PyPy to speed things up (a lot).  Just install
 it, or change the first line of the script to use Python instead).
