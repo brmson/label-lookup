@@ -26,7 +26,7 @@ Input data (DBpedia-2014):
 First, we preprocess the dataset to build a single sorted list sorted_list.dat
 to speed up next loadings:
 
-	./preprocess.py labels_en.nt page-ids_en.nt sorted_list.dat
+	./preprocess.py labels_en.nt page_ids_en.nt sorted_list.dat
 
 ### Python Setup
 
