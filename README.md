@@ -23,6 +23,17 @@ The script currently requires the labels_en.nq and page-ids-en.nq files to be in
 After sorting and merging both lists, it creates a file called sorted_list.dat, which is used
 to speed up loading.
 
+Our Python executables use PyPy to speed things up (a lot).  Just install
+it, or change the first line of the script to use Python instead).
+However, you will also need to install the Flask module within PyPy
+(already installed Python module won't do the trick).  Easiest is to
+install PyPy-specific pip, then use it to install flask:
+
+	curl -O https://bootstrap.pypa.io/get-pip.py
+	pypy get-pip.py
+	mv /usr/local/bin/pip ./pypy_pip
+	./pypy_pip install flask
+
 Usage
 -----
 
