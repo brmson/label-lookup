@@ -1,22 +1,22 @@
 #!/usr/bin/pypy
-#Script for pseudo-fuzzy search in a list of labels
+# Script for pseudo-fuzzy search in a list of labels
 
 import os
 from flask import *
 app = Flask(__name__)
 
 edit_threshold = 3
-neighbours_to_check = 2 # the checked amount is double, because we look n positions up and n positions down
+neighbours_to_check = 2  # the checked amount is double, because we look n positions up and n positions down
 labels_and_ids = []
 reversed_labels = []
 labels_filename = "labels_en.nq"
 pageIDs_filename = "page-ids_en.nq"
 
-#list of tuples, labels[i][0] is the label which we use to search, labels[i][1] is the property name which we return
+
+# list of tuples, labels[i][0] is the label which we use to search, labels[i][1] is the property name which we return
 def load_labels():
     loaded_labels = []
     with open(labels_filename, "r") as f:
-        counter = 0
         next(f)
         for line in f:
             name = line[len('<http://dbpedia.org/resource/'):line.find('>')]
@@ -26,10 +26,12 @@ def load_labels():
             loaded_labels.append((label, name))
     return loaded_labels
 
+
 def save_to_file():
     with open("sorted_list.dat", "w") as f:
         for x in range(0, len(labels_and_ids)):
             f.write(labels_and_ids[x][0] + "\t" + labels_and_ids[x][1] + "\t" + labels_and_ids[x][2] + "\n")
+
 
 def load_from_file():
     res = []
@@ -39,8 +41,9 @@ def load_from_file():
             res.append((tmp[0], tmp[1], tmp[2]))
     return res
 
-#XXX code duplication
-#labels[i][0] is the property name and labels[i][1] is the pageID
+
+# XXX code duplication
+# labels[i][0] is the property name and labels[i][1] is the pageID
 def load_IDs():
     loaded_IDs = []
     with open(pageIDs_filename, "r") as p:
@@ -53,14 +56,14 @@ def load_IDs():
             loaded_IDs.append((pageID_name, pageID))
     return loaded_IDs
 
-#finds a wikipedia ID for each label
+
+# finds a wikipedia ID for each label
 # list[x][0] is the label we use to search, list[x][1] is the name to return and list[x][2] is the wikiID
 def merge_tuple_lists(label_list, ID_list):
     result_list = []
     skipped = 0
     print str(len(label_list))
     print str(len(ID_list))
-    counter = 0
     for x in range(0, len(label_list)):
         nextID = binary_retrieve(label_list[x][1], ID_list)
         if(nextID != -1):
@@ -70,6 +73,7 @@ def merge_tuple_lists(label_list, ID_list):
     percentage = (skipped/float(len(label_list)))*100
     print "skipped: " + str(skipped) + ", " + str(percentage) + "% "
     return result_list
+
 
 def binary_retrieve(name, ids):
     lower_bound = 0
@@ -85,8 +89,10 @@ def binary_retrieve(name, ids):
             return ids[middle][1]
     return -1
 
-def levenshtein(s, t): # XXX this can be done better using numPy
+
+def levenshtein(s, t):
         ''' From Wikipedia article; Iterative with two matrix rows. '''
+        # XXX this can be done better using numPy
         if s == t: return 0
         elif len(s) == 0: return len(t)
         elif len(t) == 0: return len(s)
@@ -103,6 +109,7 @@ def levenshtein(s, t): # XXX this can be done better using numPy
                 v0[j] = v1[j]
         return v1[len(t)]
 
+
 def binary_search(name, labels):
     lower_bound = 0
     upper_bound = len(labels)
@@ -117,12 +124,13 @@ def binary_search(name, labels):
         elif labels[middle][0] > name:
             upper_bound = middle - 1
         else:
-            break #full match
+            break  # full match
     return result
 
-#checks the edit distance of 2n neighbours and the target index
+
+# checks the edit distance of 2n neighbours and the target index
 def check_neighbours(name, labels, index):
-    #check bounds of list
+    # check bounds of list
     global neighbours_to_check
     start = (index - neighbours_to_check) if (index - neighbours_to_check) > 0 else 0
     end = (index + neighbours_to_check) if (index + neighbours_to_check) < (len(labels) - 1) else (len(labels) - 1)
@@ -133,9 +141,11 @@ def check_neighbours(name, labels, index):
             res.add((labels[x][1], labels[x][2]))
     return res
 
+
 def web_init():
     init()
     app.run()
+
 
 def init():
     global labels_and_ids
@@ -153,12 +163,13 @@ def init():
         ids.sort(key=lambda x: x[0])
         print "sorting done, merging"
         labels_and_ids = merge_tuple_lists(labels, ids)
-        del labels # XXX the memory usage gets really high
+        del labels  # XXX the memory usage gets really high
         del ids
         save_to_file()
     reversed_labels = map(lambda x: (x[0][::-1], x[1], x[2]), labels_and_ids)
     reversed_labels.sort(key=lambda x: x[0])
     print "init done"
+
 
 @app.route('/search/<name>')
 def search(name):
@@ -171,6 +182,7 @@ def search(name):
     print "found:"
     print result_list[:3]
     return jsonify(results=result_list[:3])
+
 
 # TOOD: add remote threshold and neighbourcount setting
 def interactive():
@@ -194,9 +206,12 @@ def interactive():
         result = result | (binary_search(name[::-1], reversed_labels))
         print list(result)
         print "now sorted and trimed"
-        sorted_list = list(result) # XXX When the result is found using reversed labels, we should also sort it in a reverse way
+        sorted_list = list(result)  # XXX When the result is found using reversed labels, we should also sort it in a reverse way
         sorted_list.sort(key=lambda x: levenshtein(name, x[0]))
         print sorted_list[:3]
     return
-#to use a more interactive console mode, change web_init() to interactive()
-if __name__ == "__main__": web_init()
+
+
+if __name__ == "__main__":
+    # To use a more interactive console mode, change web_init() to interactive()
+    web_init()
