@@ -14,12 +14,10 @@ Setup
 
 ### Data Preprocessing
 
-Input data:
-  * http://downloads.dbpedia.org/2015-04/core-i18n/en/labels_en.nt.bz2
-  * http://downloads.dbpedia.org/2015-04/core-i18n/en/page-ids_en.nt.bz2
-
-(FIXME: We may want to use DBpedia-2014 consistent with our YodaQA scientific
-setting instead?)
+Input data (DBpedia-2014):
+  * http://downloads.dbpedia.org/2014/en/labels_en.nt.bz2
+  * http://downloads.dbpedia.org/2014/en/page_ids_en.nt.bz2
+(FIXME: Use DBpedia-2015-04 for the movies setting instead?)
 
 First, we preprocess the dataset to build a single sorted list sorted_list.dat
 to speed up next loadings:
