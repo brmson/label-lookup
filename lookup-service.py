@@ -10,17 +10,6 @@ app = Flask(__name__)
 
 edit_threshold = 3
 neighbours_to_check = 2  # the checked amount is double, because we look n positions up and n positions down
-labels_and_ids = []
-reversed_labels = []
-
-
-def load_from_file(list_filename):
-    res = []
-    with open(list_filename, "r") as f:
-        for line in f:
-            tmp = line.split("\t")
-            res.append((tmp[0], tmp[1], tmp[2]))
-    return res
 
 
 def levenshtein(s, t):
@@ -43,6 +32,20 @@ def levenshtein(s, t):
     return v1[len(t)]
 
 
+# checks the edit distance of 2n neighbours and the target index
+def check_neighbours(name, labels, index):
+    # check bounds of list
+    global neighbours_to_check
+    start = (index - neighbours_to_check) if (index - neighbours_to_check) > 0 else 0
+    end = (index + neighbours_to_check) if (index + neighbours_to_check) < (len(labels) - 1) else (len(labels) - 1)
+    res = set()
+    global edit_threshold
+    for x in range(start, end):
+        if (levenshtein(name, labels[x][0]) <= edit_threshold):
+            res.add((labels[x][1], labels[x][2]))
+    return res
+
+
 def binary_search(name, labels):
     lower_bound = 0
     upper_bound = len(labels)
@@ -61,57 +64,57 @@ def binary_search(name, labels):
     return result
 
 
-# checks the edit distance of 2n neighbours and the target index
-def check_neighbours(name, labels, index):
-    # check bounds of list
-    global neighbours_to_check
-    start = (index - neighbours_to_check) if (index - neighbours_to_check) > 0 else 0
-    end = (index + neighbours_to_check) if (index + neighbours_to_check) < (len(labels) - 1) else (len(labels) - 1)
-    res = set()
-    global edit_threshold
-    for x in range(start, end):
-        if (levenshtein(name, labels[x][0]) <= edit_threshold):
-            res.add((labels[x][1], labels[x][2]))
-    return res
+class Dataset:
+    """
+    Holding container for the mappings we query - from labels to URLs
+    and from URLs to pageIDs.
+    """
+    def __init__(self, labels_and_ids):
+        self.labels_and_ids = labels_and_ids
+        self.reversed_labels = map(lambda x: (x[0][::-1], x[1], x[2]), labels_and_ids)
+        self.reversed_labels.sort(key=lambda x: x[0])
 
+    @staticmethod
+    def load_from_file(list_filename):
+        print('loading labels')
+        labels_and_ids = []
+        with open(list_filename, "r") as f:
+            for line in f:
+                tmp = line.split("\t")
+                labels_and_ids.append((tmp[0], tmp[1], tmp[2]))
+        print len(labels_and_ids)
 
-def init(list_filename):
-    global labels_and_ids
-    global reversed_labels
-    print "loading from file"
-    labels_and_ids = load_from_file(list_filename)
-    print len(labels_and_ids)
-    reversed_labels = map(lambda x: (x[0][::-1], x[1], x[2]), labels_and_ids)
-    reversed_labels.sort(key=lambda x: x[0])
-    print "init done"
+        return Dataset(labels_and_ids)
 
-
-def search(name):
-    result = set()
-    result = result | binary_search(name, labels_and_ids)
-    result = result | binary_search(name[::-1], reversed_labels)
-    result_list = list(result)
-    result_list.sort(key=lambda x: levenshtein(name, x[0]))
-    return result_list
+    def search(self, name):
+        result = set()
+        result = result | binary_search(name, self.labels_and_ids)
+        result = result | binary_search(name[::-1], self.reversed_labels)
+        result_list = list(result)
+        result_list.sort(key=lambda x: levenshtein(name, x[0]))
+        return result_list
 
 
 @app.route('/search/<name>')
 def web_search(name):
     print "searching " + name
-    result_list = search(name)
+    global dataset
+    result_list = dataset.search(name)
     print "found:"
     print result_list[:3]
     return jsonify(results=result_list[:3])
 
 
 def web_init(list_filename):
-    init(list_filename)
+    global dataset
+    dataset = Dataset.load_from_file(list_filename)
     app.run(port=5000, host='0.0.0.0', debug=True, use_reloader=False)
 
 
 # TOOD: add remote threshold and neighbourcount setting
 def interactive(list_filename):
-    init(list_filename)
+    global dataset
+    dataset = Dataset.load_from_file(list_filename)
     while (True):
         name = raw_input("lets look for: ")
         if (name == "exit"):
@@ -126,7 +129,7 @@ def interactive(list_filename):
             next_num = int(input("current edit threshold is "+str(edit_threshold)+", please input new number "))
             edit_threshold = next_num
             continue
-        sorted_list = search(name)
+        sorted_list = dataset.search(name)
         print sorted_list[:3]
     return
 
