@@ -82,14 +82,19 @@ def init():
     print "init done"
 
 
-@app.route('/search/<name>')
 def search(name):
-    print "searching " + name
     result = set()
     result = result | binary_search(name, labels_and_ids)
     result = result | binary_search(name[::-1], reversed_labels)
     result_list = list(result)
     result_list.sort(key=lambda x: levenshtein(name, x[0]))
+    return result_list
+
+
+@app.route('/search/<name>')
+def web_search(name):
+    print "searching " + name
+    result_list = search(name)
     print "found:"
     print result_list[:3]
     return jsonify(results=result_list[:3])
@@ -104,7 +109,6 @@ def web_init():
 def interactive():
     init()
     while (True):
-        result = set()
         name = raw_input("lets look for: ")
         if (name == "exit"):
             break
@@ -118,12 +122,7 @@ def interactive():
             next_num = int(input("current edit threshold is "+str(edit_threshold)+", please input new number "))
             edit_threshold = next_num
             continue
-        result = result | binary_search(name, labels_and_ids)
-        result = result | (binary_search(name[::-1], reversed_labels))
-        print list(result)
-        print "now sorted and trimed"
-        sorted_list = list(result)  # XXX When the result is found using reversed labels, we should also sort it in a reverse way
-        sorted_list.sort(key=lambda x: levenshtein(name, x[0]))
+        sorted_list = search(name)
         print sorted_list[:3]
     return
 
