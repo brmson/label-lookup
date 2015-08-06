@@ -7,7 +7,7 @@
 # and generates a new dataset of (label, URL_subset, pageID) triplets
 # sorted by the label.
 #
-# Usage: ./preprocess.py labels_en.nq page-ids_en.nq sorted_list.dat
+# Usage: ./preprocess.py labels_en.nt page-ids_en.nt sorted_list.dat
 
 import sys
 
