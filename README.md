@@ -48,7 +48,7 @@ Just run the script:
 
 	./lookup-service.py
 
-Wait about 5 minutes and then send requests to
+Wait until a confirmation message shows up and then send requests to
 ``http://localhost:5000/search/<searchedlabel>``,
 for example ``http://localhost:5000/search/AlbaniaPeople``.
 It returns a json containing the label and it's wikipedia pageID.

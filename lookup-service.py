@@ -97,7 +97,7 @@ def search(name):
 
 def web_init():
     init()
-    app.run()
+    app.run(port=5000, host='0.0.0.0')
 
 
 # TOOD: add remote threshold and neighbourcount setting
