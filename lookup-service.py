@@ -1,5 +1,9 @@
 #!/usr/bin/pypy
 # Script for pseudo-fuzzy search in a list of labels
+#
+# Usage: ./lookup-service.py sorted_list.dat
+
+import sys
 
 from flask import *
 app = Flask(__name__)
@@ -10,9 +14,9 @@ labels_and_ids = []
 reversed_labels = []
 
 
-def load_from_file():
+def load_from_file(list_filename):
     res = []
-    with open("sorted_list.dat", "r") as f:
+    with open(list_filename, "r") as f:
         for line in f:
             tmp = line.split("\t")
             res.append((tmp[0], tmp[1], tmp[2]))
@@ -71,11 +75,11 @@ def check_neighbours(name, labels, index):
     return res
 
 
-def init():
+def init(list_filename):
     global labels_and_ids
     global reversed_labels
     print "loading from file"
-    labels_and_ids = load_from_file()
+    labels_and_ids = load_from_file(list_filename)
     print len(labels_and_ids)
     reversed_labels = map(lambda x: (x[0][::-1], x[1], x[2]), labels_and_ids)
     reversed_labels.sort(key=lambda x: x[0])
@@ -100,14 +104,14 @@ def web_search(name):
     return jsonify(results=result_list[:3])
 
 
-def web_init():
-    init()
+def web_init(list_filename):
+    init(list_filename)
     app.run(port=5000, host='0.0.0.0', debug=True, use_reloader=False)
 
 
 # TOOD: add remote threshold and neighbourcount setting
-def interactive():
-    init()
+def interactive(list_filename):
+    init(list_filename)
     while (True):
         name = raw_input("lets look for: ")
         if (name == "exit"):
@@ -128,5 +132,7 @@ def interactive():
 
 
 if __name__ == "__main__":
-    # To use a more interactive console mode, change web_init() to interactive()
-    web_init()
+    list_filename = sys.argv[1]
+    # To use a more interactive console mode, change web_init(...) to
+    # interactive(...)
+    web_init(list_filename)
