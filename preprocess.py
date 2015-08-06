@@ -6,39 +6,40 @@
 #   * (URL, has-a, pageID) triplets
 # and generates a new dataset of (label, URL_subset, pageID) triplets
 # sorted by the label.
+# and generates a new dataset of (label, pageID) tuples sorted by
+# the label.
 #
 # Usage: ./preprocess.py labels_en.nt page_ids_en.nt sorted_list.dat
 
 import sys
 
 
-# list of tuples, labels[i][0] is the label which we use to search, labels[i][1] is the property name which we return
-def load_labels(labels_filename):
-    loaded_labels = []
-    with open(labels_filename, "r") as f:
-        next(f)
+def load_literals(nt_filename, first=0):
+    """
+    From an .nt file, produce a list of tuples with the last and first
+    elements.
+
+    We make some strong assumptions:
+    * the first element is DBpedia resource
+    * the middle element is always the same predicate (which we ignore)
+    * the last element is a literal
+
+    If the first parameter is 0, the first element in the tuple is the
+    name (URL); if it's 1, it's the label.
+    """
+    tuples = []
+    with open(nt_filename, "r") as f:
+        next(f)  # a comment comes first
         for line in f:
             name = line[len('<http://dbpedia.org/resource/'):line.find('>')]
-            label_start_index = line.find('\"')+1
-            label_end_index = line.find('\"', label_start_index)
-            label = line[label_start_index:label_end_index]
-            loaded_labels.append((label, name))
-    return loaded_labels
-
-
-# XXX code duplication
-# labels[i][0] is the property name and labels[i][1] is the pageID
-def load_IDs(pageIDs_filename):
-    loaded_IDs = []
-    with open(pageIDs_filename, "r") as p:
-        next(p)
-        for line in p:
-            pageID_name = line[len('<http://dbpedia.org/resource/'):line.find('>')]
-            pageID_start_index = line.find('\"') + 1
-            pageID_end_index = line.find('\"', pageID_start_index)
-            pageID = line[pageID_start_index:pageID_end_index]
-            loaded_IDs.append((pageID_name, pageID))
-    return loaded_IDs
+            l_start_index = line.find('\"')+1
+            l_end_index = line.find('\"', l_start_index)
+            l = line[l_start_index:l_end_index]
+            if first == 0:
+                tuples.append((name, l))
+            else:
+                tuples.append((l, name))
+    return tuples
 
 
 def binary_retrieve(name, ids):
@@ -84,9 +85,9 @@ if __name__ == "__main__":
     labels_filename, pageIDs_filename, list_filename = sys.argv[1:]
 
     print "loading labels"
-    labels = load_labels(labels_filename)
+    labels = load_literals(labels_filename, first=1)
     print "loading IDs"
-    ids = load_IDs(pageIDs_filename)
+    ids = load_literals(pageIDs_filename)
 
     print "loading done, starting sort"
     labels.sort(key=lambda x: x[0])
