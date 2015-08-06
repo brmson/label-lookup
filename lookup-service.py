@@ -14,6 +14,11 @@ neighbours_to_check = 2  # the checked amount is double, because we look n posit
 
 def levenshtein(s, t):
     ''' From Wikipedia article; Iterative with two matrix rows. '''
+    # First, make things case-insensitive.
+    # XXX: We should give some *small* penalty to case differences.
+    s = s.lower()
+    t = t.lower()
+
     # XXX this can be done better using numPy
     if s == t: return 0
     elif len(s) == 0: return len(t)
