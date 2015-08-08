@@ -103,7 +103,7 @@ class Dataset:
         result = result | binary_search(name, self.labels)
         result = result | set([(r[0][::-1], r[1]) for r in binary_search(name[::-1], self.reversed_labels)])
         result_list = [{
-                'label': r[0],
+                'matchedLabel': r[0],
                 'canonLabel': self.canon_label_map[r[1]],
                 'name': r[1],
                 'pageID': self.id_map[r[1]],
