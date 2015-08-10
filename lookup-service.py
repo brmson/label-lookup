@@ -60,9 +60,9 @@ def binary_search(name, labels):
     while lower_bound <= upper_bound:
         middle = (lower_bound+upper_bound) // 2
         result = result | (check_neighbours(name, labels, middle))
-        if labels[middle][0] < name:
+        if labels[middle][0].lower() < name:
             lower_bound = middle + 1
-        elif labels[middle][0] > name:
+        elif labels[middle][0].lower() > name:
             upper_bound = middle - 1
         else:
             break  # full match
@@ -99,6 +99,7 @@ class Dataset:
         return Dataset(labels, id_map, canon_label_map)
 
     def search(self, name):
+        name = name.lower()
         result = set()
         result = result | binary_search(name, self.labels)
         result = result | set([(r[0][::-1], r[1]) for r in binary_search(name[::-1], self.reversed_labels)])
