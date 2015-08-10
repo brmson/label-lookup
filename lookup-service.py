@@ -156,5 +156,5 @@ if __name__ == "__main__":
     list_filename = sys.argv[1]
     # To use a more interactive console mode, change web_init(...) to
     # interactive(...)
-    #web_init(list_filename)
-    interactive(list_filename)
+    web_init(list_filename)
+    #interactive(list_filename)
