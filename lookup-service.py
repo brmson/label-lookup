@@ -77,7 +77,7 @@ class Dataset:
     def __init__(self, labels, id_map, canon_label_map):
         self.labels = labels
         self.reversed_labels = map(lambda x: (x[0][::-1], x[1]), labels)
-        self.reversed_labels.sort(key=lambda x: x[0])
+        self.reversed_labels.sort(key=lambda x: x[0].lower())
         self.id_map = id_map
         self.canon_label_map = canon_label_map
 
@@ -99,7 +99,7 @@ class Dataset:
         return Dataset(labels, id_map, canon_label_map)
 
     def search(self, name):
-        name = name.lower()
+        name = name.lower() #the labels are sorted in lowercase
         result = set()
         result = result | binary_search(name, self.labels)
         result = result | set([(r[0][::-1], r[1]) for r in binary_search(name[::-1], self.reversed_labels)])
@@ -130,7 +130,6 @@ def web_init(list_filename):
     app.run(port=5000, host='0.0.0.0', debug=True, use_reloader=False)
 
 
-# TOOD: add remote threshold and neighbourcount setting
 def interactive(list_filename):
     global dataset
     dataset = Dataset.load_from_file(list_filename)
@@ -157,4 +156,5 @@ if __name__ == "__main__":
     list_filename = sys.argv[1]
     # To use a more interactive console mode, change web_init(...) to
     # interactive(...)
-    web_init(list_filename)
+    #web_init(list_filename)
+    interactive(list_filename)

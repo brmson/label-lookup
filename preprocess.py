@@ -46,7 +46,8 @@ if __name__ == "__main__":
     redirect_map = ntfile.load_resources(redirects_filename)
 
     print "loading done, sorting"
-    labels = sorted(label_map.keys())
+    labels = label_map.keys()
+    labels.sort(key=lambda x: x.lower())
 
     print "saving to file"
     save_to_file(labels, label_map, id_map, redirect_map, list_filename)
