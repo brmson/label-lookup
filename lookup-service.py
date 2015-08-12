@@ -10,31 +10,34 @@ app = Flask(__name__)
 
 edit_threshold = 3
 neighbours_to_check = 2  # the checked amount is double, because we look n positions up and n positions down
+case_change_const = 0.5  # edit distance const for any case change required
 
 
 def levenshtein(s, t):
     ''' From Wikipedia article; Iterative with two matrix rows. '''
-    # First, make things case-insensitive.
-    # XXX: We should give some *small* penalty to case differences.
-    s = s.lower()
-    t = t.lower()
-
     # XXX this can be done better using numPy
     if s == t: return 0
     elif len(s) == 0: return len(t)
     elif len(t) == 0: return len(s)
     v0 = [None] * (len(t) + 1)
     v1 = [None] * (len(t) + 1)
+    case_penalty = 0
     for i in range(len(v0)):
         v0[i] = i
     for i in range(len(s)):
         v1[0] = i + 1
         for j in range(len(t)):
-            cost = 0 if s[i] == t[j] else 1
+            if s[i] == t[j]:
+                cost = 0
+            elif s[i].lower() == t[j].lower():
+                cost = 0
+                case_penalty = case_change_cost
+            else:
+                cost = 1
             v1[j + 1] = min(v1[j] + 1, v0[j + 1] + 1, v0[j] + cost)
         for j in range(len(v0)):
             v0[j] = v1[j]
-    return v1[len(t)]
+    return v1[len(t)] + case_penalty
 
 
 # checks the edit distance of 2n neighbours and the target index
@@ -52,6 +55,7 @@ def check_neighbours(name, labels, index):
 
 
 def binary_search(name, labels):
+    lname = name.lower()
     lower_bound = 0
     upper_bound = len(labels)
     middle = 0
@@ -60,9 +64,9 @@ def binary_search(name, labels):
     while lower_bound <= upper_bound:
         middle = (lower_bound+upper_bound) // 2
         result = result | (check_neighbours(name, labels, middle))
-        if labels[middle][0].lower() < name:
+        if labels[middle][0].lower() < lname:
             lower_bound = middle + 1
-        elif labels[middle][0].lower() > name:
+        elif labels[middle][0].lower() > lname:
             upper_bound = middle - 1
         else:
             break  # full match
@@ -99,7 +103,6 @@ class Dataset:
         return Dataset(labels, id_map, canon_label_map)
 
     def search(self, name):
-        name = name.lower() #the labels are sorted in lowercase
         result = set()
         result = result | binary_search(name, self.labels)
         result = result | set([(r[0][::-1], r[1]) for r in binary_search(name[::-1], self.reversed_labels)])
