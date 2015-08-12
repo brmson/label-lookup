@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 edit_threshold = 3
 neighbours_to_check = 2  # the checked amount is double, because we look n positions up and n positions down
-case_change_const = 0.5  # edit distance const for any case change required
+case_change_cost = 0.5  # edit distance const for any case change required
 
 
 def levenshtein(s, t):
@@ -31,7 +31,8 @@ def levenshtein(s, t):
                 cost = 0
             elif s[i].lower() == t[j].lower():
                 cost = 0
-                case_penalty = case_change_cost
+                if (i == j and not i == 0 ): #don't compare the first position
+                    case_penalty = case_change_cost
             else:
                 cost = 1
             v1[j + 1] = min(v1[j] + 1, v0[j + 1] + 1, v0[j] + cost)
@@ -159,5 +160,5 @@ if __name__ == "__main__":
     list_filename = sys.argv[1]
     # To use a more interactive console mode, change web_init(...) to
     # interactive(...)
-    web_init(list_filename)
-    #interactive(list_filename)
+    #web_init(list_filename)
+    interactive(list_filename)
