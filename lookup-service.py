@@ -31,8 +31,9 @@ def levenshtein(s, t):
                 cost = 0
             elif s[i].lower() == t[j].lower():
                 cost = 0
-                if ((t[max(j-1,0)] == ' ' and s[max(i-1, 0)]  == ' ') and i != 0): #don't compare the first position
-                	case_penalty = case_change_cost
+                # Tolerate case changes at the beginnings of words.
+                if not (i == 0 or j == 0 or not s[i-1].isalnum() or not t[j-1].isalnum()):
+                    case_penalty = case_change_cost
             else:
                 cost = 1
             v1[j + 1] = min(v1[j] + 1, v0[j + 1] + 1, v0[j] + cost)
