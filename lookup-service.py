@@ -11,7 +11,9 @@ app = Flask(__name__)
 edit_threshold = 3
 neighbours_to_check = 2  # the checked amount is double, because we look n positions up and n positions down
 case_change_cost = 0.5  # edit distance const for any case change required
-
+interpunction_penalty = 0
+whitespace_penalty = 0
+apostrophe_with_s_penalty = 0
 
 def levenshtein(s, t):
     ''' From Wikipedia article; Iterative with two matrix rows. '''
@@ -27,6 +29,7 @@ def levenshtein(s, t):
     for i in range(len(s)):
         v1[0] = i + 1
         for j in range(len(t)):
+            alt_cost = 1
             if s[i] == t[j]:
                 cost = 0
             elif s[i].lower() == t[j].lower():
@@ -35,8 +38,19 @@ def levenshtein(s, t):
                 if not (i == 0 or j == 0 or not s[i-1].isalnum() or not t[j-1].isalnum()):
                     case_penalty = case_change_cost
             else:
+                if not(s[i].isalnum() or s[i].isspace()) or not(t[j].isalnum() or t[j].isspace()): # is interpunction character
+                    alt_cost = interpunction_penalty
+                elif s[i].isspace() or t[j].isspace():
+                	alt_cost = whitespace_penalty
+                else:
+                	if i>0:
+                		if s[i] == 's' and s[i-1] == '\'':
+                			alt_cost = apostrophe_with_s_penalty
+                	if j>0:
+                		if t[j] == 's' and t[j-1] == '\'':
+                			alt_cost = apostrophe_with_s_penalty
                 cost = 1
-            v1[j + 1] = min(v1[j] + 1, v0[j + 1] + 1, v0[j] + cost)
+            v1[j + 1] = min(v1[j] + alt_cost, v0[j + 1] + alt_cost, v0[j] + cost)
         for j in range(len(v0)):
             v0[j] = v1[j]
     return v1[len(t)] + case_penalty
@@ -162,4 +176,4 @@ if __name__ == "__main__":
     # To use a more interactive console mode, change web_init(...) to
     # interactive(...)
     web_init(list_filename)
-    #interactive(list_filename)
+    # interactive(list_filename)
