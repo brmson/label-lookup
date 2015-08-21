@@ -99,31 +99,27 @@ def binary_search(name, labels, reversed):
 class Dataset:
     """
     Holding container for the mappings we query - from labels to URLs
-    and from URLs to pageIDs.
     """
-    def __init__(self, labels, id_map, canon_label_map):
+    def __init__(self, labels, canon_label_map):
         self.labels = labels
         self.reversed_labels = map(lambda x: (x[0][::-1], x[1]), labels)
         self.reversed_labels.sort(key=lambda x: x[0].lower())
-        self.id_map = id_map
         self.canon_label_map = canon_label_map
 
     @staticmethod
     def load_from_file(list_filename):
         print('loading labels')
         labels = []
-        id_map = dict()
         canon_label_map = dict()
         with open(list_filename, "r") as f:
             for line in f:
                 label, url, pageID, isCanon = line.rstrip().split("\t")
                 labels.append((label, url))
-                id_map[url] = pageID
                 if bool(int(isCanon)):
                     canon_label_map[url] = label
         print len(labels)
 
-        return Dataset(labels, id_map, canon_label_map)
+        return Dataset(labels, canon_label_map)
 
     def search(self, name):
         result = set()
@@ -133,7 +129,6 @@ class Dataset:
                 'matchedLabel': r[0],
                 'canonLabel': self.canon_label_map[r[1]],
                 'name': r[1],
-                'pageID': self.id_map[r[1]],
                 'dist': levenshtein(name, r[0])
             } for r in result if r[1] in self.canon_label_map]
         result_list.sort(key=lambda x: x['dist'])
