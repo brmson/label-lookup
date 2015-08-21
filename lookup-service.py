@@ -6,7 +6,6 @@
 import sys
 
 from flask import *
-import time
 app = Flask(__name__)
 
 edit_threshold = 3
@@ -174,12 +173,8 @@ def interactive(list_filename):
             next_num = int(input("current edit threshold is "+str(edit_threshold)+", please input new number "))
             edit_threshold = next_num
             continue
-        start = time.time()
         sorted_list = dataset.search(name)
         print sorted_list[:3]
-        end = time.time()
-
-        print "took "+ str(end-start) + "s"
     return
 
 
@@ -187,5 +182,5 @@ if __name__ == "__main__":
     list_filename = sys.argv[1]
     # To use a more interactive console mode, change web_init(...) to
     # interactive(...)
-    # web_init(list_filename)
-    interactive(list_filename)
+    web_init(list_filename)
+    # interactive(list_filename)
