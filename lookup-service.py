@@ -135,7 +135,7 @@ class Dataset:
                 'name': r[1],
                 'pageID': self.id_map[r[1]],
                 'dist': levenshtein(name, r[0])
-            } for r in result]
+            } for r in result if r[1] in self.canon_label_map]
         result_list.sort(key=lambda x: x['dist'])
         return result_list
 
