@@ -54,7 +54,7 @@ def get_interpunction_cost(s, i):
         ins_cost = interpunction_penalty
     elif s[i].isspace():
         ins_cost = whitespace_penalty
-    elif i>0: #When there is an s after an apostrophe, the altogether cost should be be 0.3
+    elif i>0: 
         if s[i] == 's' and s[i-1] == '\'':
             ins_cost = apostrophe_with_s_penalty
     return ins_cost
