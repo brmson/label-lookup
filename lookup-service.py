@@ -6,6 +6,7 @@
 import sys
 
 from flask import *
+import time
 app = Flask(__name__)
 
 edit_threshold = 3
@@ -29,7 +30,8 @@ def levenshtein(s, t):
     for i in range(len(s)):
         v1[0] = i + 1
         for j in range(len(t)):
-            ins_cost = 1
+        	ins_cost = 1
+        	ins_cost2 = 1
             if s[i] == t[j]:
                 cost = 0
             elif s[i].lower() == t[j].lower():
@@ -38,26 +40,27 @@ def levenshtein(s, t):
                 if not (i == 0 or j == 0 or not s[i-1].isalnum() or not t[j-1].isalnum()):
                     case_penalty = case_change_cost
             else:
-                if not(s[i].isalnum() or s[i].isspace()) or not(t[j].isalnum() or t[j].isspace()): # is interpunction character
-                    ins_cost = interpunction_penalty
-                elif s[i].isspace() or t[j].isspace():
-                    ins_cost = whitespace_penalty
-                else:
-                    if i>0:
-                        if s[i] == 's' and s[i-1] == '\'':
-                            ins_cost = apostrophe_with_s_penalty
-                    if j>0:
-                        if t[j] == 's' and t[j-1] == '\'':
-                            ins_cost = apostrophe_with_s_penalty
                 cost = 1
-            v1[j + 1] = min(v1[j] + ins_cost, v0[j + 1] + ins_cost, v0[j] + cost)
+                ins_cost = get_interpunction_cost(t, j)
+                ins_cost2 = get_interpunction_cost(s, i)
+            v1[j + 1] = min(v1[j] + ins_cost, v0[j + 1] + ins_cost2, v0[j] + cost)
         for j in range(len(v0)):
             v0[j] = v1[j]
     return v1[len(t)] + case_penalty
 
+def get_interpunction_cost(s, i):
+    ins_cost = 1
+    if not(s[i].isalnum() or s[i].isspace()): # is interpunction character
+        ins_cost = interpunction_penalty
+    elif s[i].isspace():
+        ins_cost = whitespace_penalty
+    elif i>0: #When there is an s after an apostrophe, the altogether cost should be be 0.3
+        if s[i] == 's' and s[i-1] == '\'':
+            ins_cost = apostrophe_with_s_penalty
+    return ins_cost
 
 # checks the edit distance of 2n neighbours and the target index
-def check_neighbours(name, labels, index):
+def check_neighbours(name, labels, index, reversed):
     # check bounds of list
     global neighbours_to_check
     start = (index - neighbours_to_check) if (index - neighbours_to_check) > 0 else 0
@@ -65,12 +68,17 @@ def check_neighbours(name, labels, index):
     res = set()
     global edit_threshold
     for x in range(start, end):
-        if (levenshtein(name, labels[x][0]) <= edit_threshold):
+        label = labels[x][0]
+        searched_name = name
+        if reversed == True:
+            label = label[::-1]
+            searched_name = searched_name[::-1]
+        if levenshtein(searched_name, label) <= edit_threshold:
             res.add(labels[x])
     return res
 
 
-def binary_search(name, labels):
+def binary_search(name, labels, reversed):
     lname = name.lower()
     lower_bound = 0
     upper_bound = len(labels)
@@ -79,7 +87,7 @@ def binary_search(name, labels):
 
     while lower_bound <= upper_bound:
         middle = (lower_bound+upper_bound) // 2
-        result = result | (check_neighbours(name, labels, middle))
+        result = result | (check_neighbours(name, labels, middle, reversed))
         if labels[middle][0].lower() < lname:
             lower_bound = middle + 1
         elif labels[middle][0].lower() > lname:
@@ -120,8 +128,8 @@ class Dataset:
 
     def search(self, name):
         result = set()
-        result = result | binary_search(name, self.labels)
-        result = result | set([(r[0][::-1], r[1]) for r in binary_search(name[::-1], self.reversed_labels)])
+        result = result | binary_search(name, self.labels, reversed=False)
+        result = result | set([(r[0][::-1], r[1]) for r in binary_search(name[::-1], self.reversed_labels, reversed=True)])
         result_list = [{
                 'matchedLabel': r[0],
                 'canonLabel': self.canon_label_map[r[1]],
@@ -166,8 +174,12 @@ def interactive(list_filename):
             next_num = int(input("current edit threshold is "+str(edit_threshold)+", please input new number "))
             edit_threshold = next_num
             continue
+        start = time.time()
         sorted_list = dataset.search(name)
         print sorted_list[:3]
+        end = time.time()
+
+        print "took "+ str(end-start) + "s"
     return
 
 
@@ -175,5 +187,5 @@ if __name__ == "__main__":
     list_filename = sys.argv[1]
     # To use a more interactive console mode, change web_init(...) to
     # interactive(...)
-    web_init(list_filename)
-    # interactive(list_filename)
+    # web_init(list_filename)
+    interactive(list_filename)
