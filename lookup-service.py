@@ -30,8 +30,8 @@ def levenshtein(s, t):
     for i in range(len(s)):
         v1[0] = i + 1
         for j in range(len(t)):
-        	ins_cost = 1
-        	ins_cost2 = 1
+            ins_cost = 1
+            ins_cost2 = 1
             if s[i] == t[j]:
                 cost = 0
             elif s[i].lower() == t[j].lower():
