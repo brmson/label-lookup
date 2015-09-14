@@ -135,7 +135,7 @@ class Dataset:
         return result_list
 
 
-@app.route('/search/<name>')
+@app.route('/search/<path:name>')
 def web_search(name):
     print "searching " + name
     global dataset
