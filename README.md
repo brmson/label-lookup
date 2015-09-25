@@ -68,8 +68,10 @@ http://ad-publications.informatik.uni-freiburg.de/CIKM_freebase_qa_BH_2015.pdf
 
 It uses a sqlite database of search strings, wiki URLs and
 the probability of the URL given the string. The dataset is located at
-http://www-nlp.stanford.edu/pubs/crosswikis-data.tar.bz2/
-It requires the dictionary.bz2 file, the database will be created automatically.
+
+	http://www-nlp.stanford.edu/pubs/crosswikis-data.tar.bz2/dictionary.bz2
+
+The database will be created automatically.
 To run the script for the first time, uncomment these two lines at the bottom:
     
     #dict_filename = sys.argv[2]
