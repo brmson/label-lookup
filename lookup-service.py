@@ -15,6 +15,7 @@ interpunction_penalty = 0.2
 whitespace_penalty = 0.3
 apostrophe_with_s_penalty = 0.1
 
+
 def levenshtein(s, t):
     ''' From Wikipedia article; Iterative with two matrix rows. '''
     # XXX this can be done better using numPy
@@ -129,7 +130,8 @@ class Dataset:
                 'matchedLabel': r[0],
                 'canonLabel': self.canon_label_map[r[1]],
                 'name': r[1],
-                'dist': levenshtein(name, r[0])
+                'dist': levenshtein(name, r[0]),
+                'prob': "0"
             } for r in result if r[1] in self.canon_label_map]
         result_list.sort(key=lambda x: x['dist'])
         return result_list
