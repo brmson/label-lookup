@@ -1,6 +1,6 @@
 #!/usr/bin/pypy
 # Script for sqlite initialisation
-# Init: ./lookup-service-sqlite.py labels.db dictionary.bz2
+# Init: ./sqlite-init.py labels.db dictionary.bz2
 
 import sqlite3
 import bz2

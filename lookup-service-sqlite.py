@@ -1,6 +1,5 @@
 #!/usr/bin/pypy
 # Script for sqlite lookupfrom crossweb dataset
-# Init: ./lookup-service-sqlite.py labels.db dictionary.bz2
 # Usage: ./lookup-service-sqlite.py labels.db
 
 import sqlite3
