@@ -70,20 +70,16 @@ It uses a sqlite database of search strings, wiki URLs and
 the probability of the URL given the string. The dataset is located at
 http://www-nlp.stanford.edu/pubs/crosswikis-data.tar.bz2/
 It requires the dictionary.bz2 file, the database will be created automatically.
-To run the script for the first time, uncomment these two lines at the bottom:
+
+To initialize the database, run 
     
-    #dict_filename = sys.argv[2]
-    #init_database(db, dict_filename)
-
-Then, start it like this:
-
-    python lookup-service-sqlite.py labels.db dictionary.bz2
+    python sqlite-init.py labels.db dictionary.bz2
 
 It will initialize the database and create an index. The resulting size is roughly 12GB. Without the index, the size is 6.6GB, but a query takes 14s.
 
-Afterwards, comment the lines again and run it like this:
+Then, start it like this:
 
-    python lookup-service-sqlite.py labels.db
+    python lookup-service-sqlite.py dictionary.bz2
 
 It uses the same API as the fuzzy label lookup and should work the same.
 To test it, send requests to``http://localhost:5001/search/<searchedlabel>``
