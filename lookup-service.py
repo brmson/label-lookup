@@ -81,7 +81,7 @@ def check_neighbours(name, labels, index, reversed):
 def binary_search(name, labels, reversed):
     lname = name.lower()
     lower_bound = 0
-    upper_bound = len(labels)
+    upper_bound = len(labels) - 1
     middle = 0
     result = set()
 

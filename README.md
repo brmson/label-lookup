@@ -68,9 +68,10 @@ http://ad-publications.informatik.uni-freiburg.de/CIKM_freebase_qa_BH_2015.pdf
 
 It uses a sqlite database of search strings, wiki URLs and
 the probability of the URL given the string. The dataset is located at
-http://www-nlp.stanford.edu/pubs/crosswikis-data.tar.bz2/
-It requires the dictionary.bz2 file, the database will be created automatically.
 
+	http://www-nlp.stanford.edu/pubs/crosswikis-data.tar.bz2/dictionary.bz2
+
+The database will be created automatically.
 To initialize the database, run 
     
     python sqlite-init.py labels.db dictionary.bz2
@@ -79,7 +80,7 @@ It will initialize the database and create an index. The resulting size is rough
 
 Then, start it like this:
 
-    python lookup-service-sqlite.py dictionary.bz2
+    python lookup-service-sqlite.py labels.db
 
 It uses the same API as the fuzzy label lookup and should work the same.
 To test it, send requests to``http://localhost:5001/search/<searchedlabel>``
