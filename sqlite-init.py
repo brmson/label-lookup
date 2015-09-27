@@ -42,7 +42,6 @@ def populate_database(db, dict_filename):
                 urlid = urlid[0]
                 cursor.execute('INSERT INTO labels(label, probability, url_id) VALUES (?, ?, ?)', (label, probability, urlid))
         connection.commit()
-        connection.close()
 
 
 #the index takes another 6gb of memory, but lookup time decreases from 14s to 0.02s
