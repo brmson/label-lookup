@@ -150,7 +150,7 @@ def web_search(name):
 def web_init(list_filename):
     global dataset
     dataset = Dataset.load_from_file(list_filename)
-    app.run(port=5000, host='0.0.0.0', debug=True, use_reloader=False)
+    app.run(port=5000, host='::', debug=True, use_reloader=False)
 
 
 def interactive(list_filename):

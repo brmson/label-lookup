@@ -39,4 +39,4 @@ def search(name):
 
 if __name__ == "__main__":
     db = sys.argv[1]
-    app.run(port=5001, host='0.0.0.0', debug=False, use_reloader=False)
+    app.run(port=5001, host='::', debug=False, use_reloader=False)
