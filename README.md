@@ -50,7 +50,7 @@ Usage
 
 Just run the script:
 
-	./lookup-service.py
+	./lookup-service.py sorted_list.txt
 
 Wait until a confirmation message shows up and then send requests to
 ``http://localhost:5000/search/<searchedlabel>``,
