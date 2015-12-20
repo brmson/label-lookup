@@ -73,14 +73,14 @@ the probability of the URL given the string. The dataset is located at
 
 The database will be created automatically.
 To initialize the database, run 
-    
-    python sqlite-init.py labels.db dictionary.bz2
+
+	./sqlite-init.py labels.db dictionary.bz2
 
 It will initialize the database and create an index. The resulting size is roughly 12GB. Without the index, the size is 6.6GB, but a query takes 14s.
 
 Then, start it like this:
 
-    python lookup-service-sqlite.py labels.db
+	./lookup-service-sqlite.py labels.db
 
 It uses the same API as the fuzzy label lookup and should work the same.
 To test it, send requests to``http://localhost:5001/search/<searchedlabel>``
