@@ -83,4 +83,8 @@ Then, start it like this:
 	./lookup-service-sqlite.py labels.db
 
 It uses the same API as the fuzzy label lookup and should work the same.
-To test it, send requests to``http://localhost:5001/search/<searchedlabel>``
+To test it, send requests to ``http://localhost:5001/search/<searchedlabel>``
+
+This API has an extra support for returning also the respective enwiki
+pageId by querying DBpedia behind the scenes:
+``http://localhost:5001/search/<searchedlabel>?addPageId=1``
