@@ -4,6 +4,7 @@
 # Usage: ./lookup-service.py sorted_list.dat
 
 import sys
+import codecs
 
 from flask import *
 app = Flask(__name__)
@@ -112,7 +113,7 @@ class Dataset:
         print('loading labels')
         labels = []
         canon_label_map = dict()
-        with open(list_filename, "r") as f:
+        with codecs.open(list_filename, "r", encoding="utf-8") as f:
             for line in f:
                 label, url, pageID, isCanon = line.rstrip().split("\t")
                 labels.append((label, url))
