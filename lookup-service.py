@@ -140,7 +140,7 @@ class Dataset:
 
 @app.route('/search/<path:name>')
 def web_search(name):
-    print "searching " + name
+    print "searching " + name.encode("utf-8")
     global dataset
     result_list = dataset.search(name)
     print "found:"
