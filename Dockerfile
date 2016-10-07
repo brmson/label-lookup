@@ -13,6 +13,10 @@ RUN apt-get update && apt-get install -y \
     git  \
     pypy
 
+# Set the locale
+ENV LANG C.UTF-8
+ENV LC_ALL C.UTF-8
+
 RUN git clone https://github.com/brmson/label-lookup.git
 # If we were to copy label-service files into image
 #ADD ./label-service /label-service
