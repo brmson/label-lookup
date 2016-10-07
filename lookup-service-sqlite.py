@@ -56,7 +56,7 @@ SELECT DISTINCT ?pageID WHERE {
 
 @app.route('/search/<path:name>')  # Also supports ?addPageId=1
 def web_search(name):
-    print "searching " + name
+    print "searching " + name.encode('utf-8')
     global dataset
     result_list = search(name, addPageId=request.args.get('addPageId', False))
     print "found:"
