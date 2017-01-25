@@ -84,7 +84,7 @@ Fist, we need to preprocess the dataset to get a mapping from dbpedia ID to free
 
 To initialize the database, run 
 
-    python freebase-init.py fb_db.sqlite dictionary.bz2 sorted_fb_list.dat
+    python freebase-init.py fb_db.sqlite dictionary sorted_fb_list.dat
 
 It will initialize the database and create an index. The resulting size is roughly 9gb. Without the index, the size smaller, but a query takes 14s.
 
