@@ -60,31 +60,40 @@ It returns a json containing the label, canon label and edit distance.
 Alternatively, it is possible to run it in interactive mode, but you have
 to change the last line from ``web_init()`` to ``interactive()``.
 
-Sqlite Lookup
+Freebase sqlite Lookup
 -------------
 This search script is based on 2 papers:
 http://nlp.stanford.edu/pubs/crosswikis.pdf
 http://ad-publications.informatik.uni-freiburg.de/CIKM_freebase_qa_BH_2015.pdf
+Together with a list of freebase IDs.
 
 It uses a sqlite database of search strings, wiki URLs and
 the probability of the URL given the string. The dataset is located at
 
-	http://www-nlp.stanford.edu/pubs/crosswikis-data.tar.bz2/dictionary.bz2
+    http://nlp.stanford.edu/data/crosswikis-data.tar.bz2/
+
+You will also need freebase_links_en.ttl, labels_en.tql, transitive_redirects_en.ttl from the
+dbpedia dump page:
+
+    http://wiki.dbpedia.org/downloads-2016-04
 
 The database will be created automatically.
+Fist, we need to preprocess the dataset to get a mapping from dbpedia ID to freebase ID
+
+    python freebase_preprocess.py labels_en.tql transitive_redirects_en.ttl freebase_links_en.ttl sorted_fb_list.dat
+
 To initialize the database, run 
 
-	./sqlite-init.py labels.db dictionary.bz2
+    python freebase-init.py fb_db.sqlite dictionary.bz2 sorted_fb_list.dat
 
-It will initialize the database and create an index. The resulting size is roughly 12GB. Without the index, the size is 6.6GB, but a query takes 14s.
+It will initialize the database and create an index. The resulting size is roughly 9gb. Without the index, the size smaller, but a query takes 14s.
 
 Then, start it like this:
 
-	./lookup-service-sqlite.py labels.db
+	./lookup-service-fb.py fb_db.sqlite
 
-It uses the same API as the fuzzy label lookup and should work the same.
+It returns the matched label, the corresponding dbpedia id, a freebase id and
+the probability of the dbpedia id giben the label.
 To test it, send requests to ``http://localhost:5001/search/<searchedlabel>``
-
-This API has an extra support for returning also the respective enwiki
-pageId by querying DBpedia behind the scenes:
-``http://localhost:5001/search/<searchedlabel>?addPageId=1``
+By default it searches the string in the database, it can also generate ngrams (by default to length
+5) by appending ?ngrams=1 to the POST 
