@@ -13,9 +13,11 @@ db = "fb_db.db"
 
 def generate_ngrams(text, n=5):
     tokens = text.strip().split(' ')
-    new_list = [a for a in (list(zip(*[tokens[i:] for i in range(k)])) for k in range(1,n+1))]
+    new_list = []#[a for a in (list(zip(*[tokens[i:] for i in range(k)])) for k in range(1,n+1))]
+    for k in range(1,n+1):
+        new_list += list(zip(*[tokens[i:] for i in range(k)]))
     new_list.reverse()
-    return [e for l in new_list for e in l]
+    return new_list
 
 def process_results(result_list):
     new_list = []
