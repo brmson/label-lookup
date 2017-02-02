@@ -4,6 +4,7 @@
 
 import sqlite3
 import sys
+import urllib2
 
 from flask import *
 app = Flask(__name__)
@@ -12,24 +13,60 @@ db = "fb_db.db"
 
 def generate_ngrams(text, n=5):
     tokens = text.strip().split(' ')
-    return (list(zip(*[tokens[i:] for i in range(k)])) for k in range(1,n+1))
+    new_list = []#[a for a in (list(zip(*[tokens[i:] for i in range(k)])) for k in range(1,n+1))]
+    for k in range(1,n+1):
+        new_list += list(zip(*[tokens[i:] for i in range(k)]))
+    new_list.reverse()
+    return new_list
+
+def process_results(result_list):
+    new_list = []
+    for results in result_list:
+        i = 0.0
+        for result in results['results'][0]:
+            i += result['prob']
+        i = i/len(results['results'][0])
+        if (i > 0.8):
+            new_list.append(results)
+    return new_list
 
 @app.route('/search/<path:name>')  # Also supports ?ngrams=0
 def web_search(name):
     # look for ngram or look just for the whole string
     ngrams = request.args.get('ngrams', False)
+    top_n = request.args.get('topn', 3)
     result_list = []
     if ngrams:
-        for ngram_list in generate_ngrams(name):
-            for ngram in ngram_list:
-                print('looking for:', ngram)
-                result_list.append(search(" ".join(ngram)))
+        #for ngram_list in generate_ngrams(name):
+        ngram_list = generate_ngrams(name)
+        # for ngram in ngram_list:
+        while len(ngram_list) != 0:
+            ngram = ngram_list[0]
+            print('looking for:', ngram)
+            response = search(" ".join(ngram))
+            # if len(response['results'][0]) > 0:
+            if len(response) > 0:
+                ls = generate_ngrams(" ".join(ngram),len(ngram))
+                for l in ls:
+                    if l in ngram_list:
+                        ngram_list.remove(l)
+                result_list.append(response)
+            if ngram in ngram_list:
+                ngram_list.remove(ngram)
+        #result_list = process_results(result_list)
     else:
         print('looking for:', name)
         result_list.append(search(name))
     print(result_list)
-    return jsonify(results=result_list[:3])
+    return jsonify(results=result_list[:top_n])
 
+
+def search_remote(name):
+    response = urllib2.urlopen('http://docker.alquistai.com:5001/search/' + name)
+    result = response.read()
+    html = json.loads(result)
+
+    return html
 
 def search(name):
     name = name.lower()
