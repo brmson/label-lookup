@@ -81,7 +81,7 @@ def search(name):
         result_list = []
         for r in sresult:
             result = {
-                'matched label': r[0],
+                'matchedLabel': r[0],
                 'db_id': r[2],
                 'freebase_id': r[3],
                 'prob': r[1]
