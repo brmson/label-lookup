@@ -1,6 +1,6 @@
 # !/usr/bin/pypy
 # Script for sqlite initialisation
-# Init: ./freebase-init.py labels.db dictionary.bz2 sorted_fb_list.dat
+# Init: ./freebase-init.py fb_db.sqlite dictionary.bz2 sorted_fb_list.dat
 import sqlite3
 import bz2
 import sys
@@ -56,6 +56,7 @@ def populate_database(db, dict_filename, fb_filename):
                 if counter % 1000000 == 0:
                     print(str(counter))
                 counter += 1
+                fb_id = fb_dict[url]
                 cursor.execute('INSERT OR IGNORE INTO URLS(url, freebase_id) VALUES (?, ?)', (url, fb_id))
                 cursor.execute('SELECT id from urls where url=?', (url,))
                 urlid = cursor.fetchone()
