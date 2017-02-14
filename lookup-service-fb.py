@@ -34,7 +34,7 @@ def process_results(result_list):
 def web_search(name):
     # look for ngram or look just for the whole string
     ngrams = request.args.get('ngrams', False)
-    top_n = request.args.get('topn', 3)
+    top_n = int(request.args.get('topn', 3))
     result_list = []
     if ngrams:
         #for ngram_list in generate_ngrams(name):
@@ -58,6 +58,8 @@ def web_search(name):
         print('looking for:', name)
         result_list.append(search(name))
     print(result_list)
+    if len(result_list) == 0:
+        result_list.append([])
     return jsonify(results=result_list[:top_n])
 
 
