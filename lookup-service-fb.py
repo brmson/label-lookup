@@ -4,7 +4,6 @@
 
 import sqlite3
 import sys
-import urllib2
 
 from flask import *
 app = Flask(__name__)
@@ -34,11 +33,12 @@ def process_results(result_list):
 def web_search(name):
     # look for ngram or look just for the whole string
     ngrams = request.args.get('ngrams', False)
-    top_n = request.args.get('topn', 3)
+    top_n = int(request.args.get('topn', 3))
     result_list = []
     if ngrams:
         #for ngram_list in generate_ngrams(name):
         ngram_list = generate_ngrams(name)
+        print(ngram_list)
         # for ngram in ngram_list:
         while len(ngram_list) != 0:
             ngram = ngram_list[0]
@@ -53,20 +53,15 @@ def web_search(name):
                 result_list.append(response)
             if ngram in ngram_list:
                 ngram_list.remove(ngram)
-        #result_list = process_results(result_list)
     else:
         print('looking for:', name)
         result_list.append(search(name))
     print(result_list)
-    return jsonify(results=result_list[:top_n])
+    # each word has several candidates, so we want to take topn of each
+    split_list = [l[:top_n] for l in result_list]   
+    return jsonify(results=split_list)
 
 
-def search_remote(name):
-    response = urllib2.urlopen('http://docker.alquistai.com:5001/search/' + name)
-    result = response.read()
-    html = json.loads(result)
-
-    return html
 
 def search(name):
     name = name.lower()
