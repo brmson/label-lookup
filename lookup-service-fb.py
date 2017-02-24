@@ -59,8 +59,6 @@ def web_search(name):
     print(result_list)
     # each word has several candidates, so we want to take topn of each
     split_list = [l[:top_n] for l in result_list]   
-    return jsonify(results=split_list)
-
 
 
 def search(name):
